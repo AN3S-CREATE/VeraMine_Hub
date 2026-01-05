@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -6,21 +6,15 @@ import {
   Truck, 
   AlertTriangle, 
   CheckCircle, 
-  Server, 
   Radio, 
-  Database, 
   Cpu, 
-  Zap,
   TrendingUp,
-  Clock,
-  Shield,
-  Users,
-  Anchor,
-  Play
+  Users
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 
 // --- BRAND TOKENS ---
+// @ts-ignore
 const COLORS = {
   bg: '#0B0E15',
   bgCard: 'rgba(29, 38, 43, 0.7)',
