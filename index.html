@@ -1,13 +1,687 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VeraMine Hub</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+import React, { useState, useEffect } from 'react';
+import { 
+  ChevronRight, 
+  ChevronLeft, 
+  Activity, 
+  Truck, 
+  AlertTriangle, 
+  CheckCircle, 
+  Server, 
+  Radio, 
+  Database, 
+  Cpu, 
+  Zap,
+  TrendingUp,
+  Clock,
+  Shield,
+  Users,
+  Anchor,
+  Play
+} from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+
+// --- BRAND TOKENS ---
+const COLORS = {
+  bg: '#0B0E15',
+  bgCard: 'rgba(29, 38, 43, 0.7)',
+  bgPanel: '#1D262B',
+  text: '#F6F3EA',
+  lime: '#D2FF05',
+  limeDim: 'rgba(210, 255, 5, 0.1)',
+  green: '#527D2D',
+  slate: '#303E47',
+  red: '#FF4D4D',
+  orange: '#FFAA00',
+  blue: '#2D9CDB'
+};
+
+const CHART_DATA = [
+  { time: '06:00', target: 3200, actual: 3100 },
+  { time: '08:00', target: 3200, actual: 3350 },
+  { time: '10:00', target: 3200, actual: 3450 },
+  { time: '12:00', target: 3200, actual: 3400 },
+  { time: '14:00', target: 3200, actual: 3600 },
+];
+
+const PIE_DATA = [
+  { name: 'Hardware', value: 1700000 },
+  { name: 'Software', value: 1200000 },
+  { name: 'Install/Labor', value: 1300000 },
+];
+
+// --- COMPONENTS ---
+
+// 1. Title Slide
+const SlideTitle = () => (
+  <div className="h-full flex flex-col justify-center items-start px-20 relative overflow-hidden">
+    <div className="absolute inset-0 z-0 opacity-20">
+      <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#D2FF05] to-transparent"></div>
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#1D262B] to-transparent"></div>
+    </div>
+    
+    <div className="z-10 relative">
+      <div className="flex items-center gap-2 mb-6">
+        <div className="w-3 h-3 bg-[#D2FF05] rounded-full animate-pulse"></div>
+        <span className="text-[#D2FF05] tracking-widest text-sm font-bold font-mono">VERALOGIX // INDUSTRIAL INTELLIGENCE</span>
+      </div>
+      
+      <h1 className="text-7xl font-extrabold text-[#F6F3EA] leading-tight mb-4 tracking-tighter">
+        SMART MINING <br/>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D2FF05] to-[#9AD153]">OPERATIONAL COMMAND</span>
+      </h1>
+      
+      <p className="text-xl text-gray-400 max-w-2xl mb-12 border-l-2 border-[#D2FF05] pl-6">
+        From fragmented sensors to a single source of truth. <br/>
+        Visibility turns into Control.
+      </p>
+      
+      <div className="flex gap-4">
+        <div className="px-6 py-3 border border-[#D2FF05] text-[#D2FF05] font-bold rounded hover:bg-[#D2FF05] hover:text-black transition-all cursor-pointer">
+          PHASE 1 PILOT PROPOSAL
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// 2. Executive Summary
+const SlideExecSum = () => (
+  <div className="h-full p-16">
+    <h2 className="text-3xl font-bold text-[#F6F3EA] mb-12 flex items-center gap-3">
+      <span className="w-2 h-8 bg-[#D2FF05]"></span> EXECUTIVE SUMMARY
+    </h2>
+    
+    <div className="grid grid-cols-3 gap-8 h-[65%]">
+      {/* Problem */}
+      <div className="bg-[#1D262B] bg-opacity-60 backdrop-blur-md border border-[#303E47] p-8 rounded-xl flex flex-col hover:border-[#D2FF05] transition-colors group">
+        <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <AlertTriangle className="text-red-500" size={24} />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-4">The Friction</h3>
+        <p className="text-gray-400 leading-relaxed">
+          Data is currently siloed between fleet, plant, and risk. Decisions are reactive. 
+          Compliance reporting takes days, creating operational lag and audit risk.
+        </p>
+      </div>
+
+      {/* Solution */}
+      <div className="bg-[#1D262B] bg-opacity-60 backdrop-blur-md border border-[#303E47] p-8 rounded-xl flex flex-col hover:border-[#D2FF05] transition-colors group">
+        <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <Activity className="text-blue-400" size={24} />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-4">The Solution</h3>
+        <p className="text-gray-400 leading-relaxed">
+          A unified real-time cockpit. We connect existing sensors (CAN-bus, PLC) to a 
+          central hub that normalizes data and flags risks instantly. Audit-ready by design.
+        </p>
+      </div>
+
+      {/* Value */}
+      <div className="bg-[#1D262B] bg-opacity-60 backdrop-blur-md border border-[#D2FF05] p-8 rounded-xl flex flex-col relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[#D2FF05] opacity-5 blur-3xl rounded-full"></div>
+        <div className="w-12 h-12 bg-[#D2FF05]/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <TrendingUp className="text-[#D2FF05]" size={24} />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-4">The Value</h3>
+        <ul className="space-y-4">
+          <li className="flex items-center gap-3 text-white">
+            <span className="text-[#D2FF05] font-bold text-2xl">15%</span>
+            <span className="text-sm text-gray-300">Reduction in Downtime</span>
+          </li>
+          <li className="flex items-center gap-3 text-white">
+            <span className="text-[#D2FF05] font-bold text-2xl">8%</span>
+            <span className="text-sm text-gray-300">Target Throughput Uplift</span>
+          </li>
+          <li className="flex items-center gap-3 text-white">
+            <span className="text-[#D2FF05] font-bold text-2xl">9mo</span>
+            <span className="text-sm text-gray-300">ROI Breakeven</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+);
+
+// 3. Dashboard Mockup (The "Interactive" Slide)
+const SlideDashboard = () => (
+  <div className="h-full flex flex-col bg-[#0B0E15] p-4 overflow-hidden relative">
+    <div className="absolute top-4 right-8 text-xs font-mono text-[#D2FF05] animate-pulse">LIVE DEMO MODE // ACTIVE</div>
+    
+    {/* Nav Bar */}
+    <div className="h-12 border-b border-[#303E47] flex items-center justify-between px-4 mb-4">
+      <div className="flex items-center gap-4">
+        <span className="font-bold text-[#F6F3EA] tracking-wider">SMART OPS</span>
+        <div className="h-4 w-[1px] bg-[#303E47]"></div>
+        <span className="text-sm text-[#D2FF05]">WOESTALLEEN COLLIERY</span>
+      </div>
+      <div className="flex items-center gap-4 text-xs text-gray-400 font-mono">
+        <span>SHIFT 1: 06:00 - 14:00</span>
+        <div className="flex items-center gap-2 px-3 py-1 bg-[#1D262B] border border-[#303E47] rounded-full">
+          <div className="w-2 h-2 rounded-full bg-[#D2FF05]"></div>
+          SYSTEM HEALTHY
+        </div>
+      </div>
+    </div>
+
+    {/* Main Grid */}
+    <div className="flex-1 grid grid-cols-12 gap-4">
+      
+      {/* Left Rail - KPIs */}
+      <div className="col-span-3 flex flex-col gap-3">
+        <div className="flex-1 bg-[#1D262B] bg-opacity-80 border border-[#303E47] rounded-lg p-5 flex flex-col justify-between">
+          <div className="text-xs text-gray-400 uppercase tracking-widest mb-2">Shift Tonnage</div>
+          <div className="text-5xl font-extrabold text-[#D2FF05]">3,450<span className="text-lg text-gray-500 font-normal">t</span></div>
+          <div className="text-xs text-green-400 flex items-center gap-1 mt-2">
+            <TrendingUp size={12}/> +4.2% vs Target
+          </div>
+        </div>
+        <div className="flex-1 bg-[#1D262B] bg-opacity-80 border border-[#303E47] rounded-lg p-5">
+          <div className="text-xs text-gray-400 uppercase tracking-widest mb-2">Fleet Avail</div>
+          <div className="text-3xl font-bold text-white">82%</div>
+          <div className="text-xs text-red-400 mt-1">3 Trucks Down (Maint)</div>
+        </div>
+        <div className="flex-1 bg-[#1D262B] bg-opacity-80 border border-[#303E47] rounded-lg p-5">
+          <div className="text-xs text-gray-400 uppercase tracking-widest mb-2">Cycle Eff.</div>
+          <div className="text-3xl font-bold text-white">94%</div>
+          <div className="text-xs text-gray-500 mt-1">Queuing: Low</div>
+        </div>
+      </div>
+
+      {/* Center - Chart */}
+      <div className="col-span-6 bg-[#1D262B] bg-opacity-50 border border-[#303E47] rounded-lg p-4 relative flex flex-col">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-bold text-white uppercase">Real-Time Throughput Analysis</h3>
+          <div className="flex gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#D2FF05]"></span>
+            <span className="text-[10px] text-gray-400">ACTUAL</span>
+            <span className="h-2 w-2 rounded-full bg-gray-500 ml-2"></span>
+            <span className="text-[10px] text-gray-400">TARGET</span>
+          </div>
+        </div>
+        <div className="flex-1 w-full min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={CHART_DATA}>
+              <defs>
+                <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#D2FF05" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#D2FF05" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#303E47" vertical={false} />
+              <XAxis dataKey="time" stroke="#6F7C84" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="#6F7C84" fontSize={10} tickLine={false} axisLine={false} />
+              <Tooltip 
+                contentStyle={{backgroundColor: '#0B0E15', borderColor: '#D2FF05', color: '#fff'}}
+                itemStyle={{color: '#D2FF05'}}
+              />
+              <Area type="monotone" dataKey="actual" stroke="#D2FF05" strokeWidth={2} fillOpacity={1} fill="url(#colorActual)" />
+              <Line type="monotone" dataKey="target" stroke="#6F7C84" strokeDasharray="5 5" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Right - Actions */}
+      <div className="col-span-3 flex flex-col gap-3">
+        <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Recommended Actions</h3>
+        
+        {/* Action Card 1 */}
+        <div className="bg-[#303E47] border-l-4 border-red-500 p-3 rounded-r-md cursor-pointer hover:bg-[#3d4d57]">
+          <div className="flex justify-between items-start mb-1">
+            <span className="text-xs font-bold text-red-400">UNSCHEDULED STOP</span>
+            <span className="text-[10px] text-gray-400">2m ago</span>
+          </div>
+          <p className="text-xs text-white mb-2">Truck 04 idle {'>'} 5 mins outside parking zone.</p>
+          <div className="flex gap-2">
+            <button className="text-[10px] bg-red-500/20 text-red-300 px-2 py-1 rounded border border-red-500/30">DISPATCH</button>
+            <button className="text-[10px] bg-gray-700 text-gray-300 px-2 py-1 rounded">IGNORE</button>
+          </div>
+        </div>
+
+        {/* Action Card 2 */}
+        <div className="bg-[#303E47] border-l-4 border-orange-500 p-3 rounded-r-md cursor-pointer hover:bg-[#3d4d57]">
+          <div className="flex justify-between items-start mb-1">
+            <span className="text-xs font-bold text-orange-400">QUEUE WARNING</span>
+            <span className="text-[10px] text-gray-400">12m ago</span>
+          </div>
+          <p className="text-xs text-white mb-2">Crusher Tip A queue length {'>'} 3 trucks.</p>
+          <div className="text-[10px] text-gray-400 flex items-center gap-1">
+            <CheckCircle size={10} className="text-[#D2FF05]"/> AI Re-routing enabled
+          </div>
+        </div>
+
+        {/* Action Card 3 */}
+        <div className="bg-[#303E47] border-l-4 border-[#D2FF05] p-3 rounded-r-md cursor-pointer hover:bg-[#3d4d57]">
+          <div className="flex justify-between items-start mb-1">
+            <span className="text-xs font-bold text-[#D2FF05]">OPTIMIZATION</span>
+            <span className="text-[10px] text-gray-400">Now</span>
+          </div>
+          <p className="text-xs text-white mb-2">Route B is 4% faster. Deploy to fleet?</p>
+          <button className="w-full text-[10px] bg-[#D2FF05] text-black font-bold px-2 py-1 rounded hover:bg-white transition-colors">
+            DEPLOY FIX
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom - Audit Log */}
+    <div className="h-32 mt-4 bg-[#1D262B] border border-[#303E47] rounded-lg overflow-hidden">
+      <table className="w-full text-left text-xs">
+        <thead className="bg-[#0B0E15] text-gray-400 font-mono">
+          <tr>
+            <th className="p-2 pl-4">TIMESTAMP</th>
+            <th className="p-2">ACTOR</th>
+            <th className="p-2">EVENT</th>
+            <th className="p-2">STATUS</th>
+          </tr>
+        </thead>
+        <tbody className="text-gray-300 divide-y divide-[#303E47]">
+          <tr>
+            <td className="p-2 pl-4 font-mono text-[#D2FF05]">14:02:22</td>
+            <td>SYS_AI_01</td>
+            <td>Route optimization logic triggered (Sector 4)</td>
+            <td><span className="text-[#D2FF05]">EXECUTED</span></td>
+          </tr>
+          <tr>
+            <td className="p-2 pl-4 font-mono text-gray-500">14:01:45</td>
+            <td>J.DOE (Mgr)</td>
+            <td>Manual override: Conveyor speed limit</td>
+            <td><span className="text-blue-400">LOGGED</span></td>
+          </tr>
+          <tr>
+            <td className="p-2 pl-4 font-mono text-gray-500">13:58:10</td>
+            <td>SENSOR_WB_2</td>
+            <td>Weight calibration verification</td>
+            <td><span className="text-green-500">PASSED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+// 4. Roadmap
+const SlideRoadmap = () => (
+  <div className="h-full p-16 flex flex-col justify-center">
+    <h2 className="text-3xl font-bold text-[#F6F3EA] mb-16 flex items-center gap-3">
+      <span className="w-2 h-8 bg-[#D2FF05]"></span> IMPLEMENTATION TIMELINE
+    </h2>
+
+    <div className="relative">
+      {/* Line */}
+      <div className="absolute top-1/2 left-0 w-full h-1 bg-[#303E47] -translate-y-1/2 z-0"></div>
+      
+      <div className="grid grid-cols-4 gap-4 relative z-10">
+        
+        {/* Phase 0 */}
+        <div className="flex flex-col items-center group">
+          <div className="w-8 h-8 rounded-full bg-[#527D2D] border-2 border-[#D2FF05] flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(210,255,5,0.5)]">
+            <CheckCircle size={16} className="text-[#D2FF05]"/>
+          </div>
+          <div className="bg-[#1D262B] border border-[#D2FF05] p-6 rounded-lg w-full min-h-[180px]">
+            <div className="text-[#D2FF05] text-xs font-bold tracking-widest mb-2">PHASE 0 (COMPLETED)</div>
+            <h3 className="text-xl font-bold text-white mb-2">Scoping</h3>
+            <p className="text-sm text-gray-400">Hardware specs defined. Site survey complete. Connectivity audit passed.</p>
+          </div>
+        </div>
+
+        {/* Phase 1 */}
+        <div className="flex flex-col items-center group">
+          <div className="w-8 h-8 rounded-full bg-[#D2FF05] flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(210,255,5,0.8)] animate-pulse">
+            <div className="w-3 h-3 bg-black rounded-full"></div>
+          </div>
+          <div className="bg-[#1D262B] border-2 border-[#D2FF05] p-6 rounded-lg w-full min-h-[180px] shadow-lg transform scale-105">
+            <div className="text-[#D2FF05] text-xs font-bold tracking-widest mb-2">PHASE 1 (READY)</div>
+            <h3 className="text-xl font-bold text-white mb-2">Visibility</h3>
+            <p className="text-sm text-gray-400">Dashboard live. LoRaWAN network active. Fleet tracking enabled. <br/><span className="text-[#D2FF05] mt-2 block font-bold">Approval Required</span></p>
+          </div>
+        </div>
+
+        {/* Phase 2 */}
+        <div className="flex flex-col items-center group">
+          <div className="w-8 h-8 rounded-full bg-[#303E47] border-2 border-gray-500 flex items-center justify-center mb-6">
+            <span className="text-xs text-gray-400">2</span>
+          </div>
+          <div className="bg-[#1D262B] border border-[#303E47] p-6 rounded-lg w-full min-h-[180px] opacity-70">
+            <div className="text-gray-500 text-xs font-bold tracking-widest mb-2">PHASE 2 (PLANNED)</div>
+            <h3 className="text-xl font-bold text-white mb-2">Prediction</h3>
+            <p className="text-sm text-gray-400">AI Risk Management integration. Predictive maintenance models for crusher.</p>
+          </div>
+        </div>
+
+        {/* Phase 3 */}
+        <div className="flex flex-col items-center group">
+          <div className="w-8 h-8 rounded-full bg-[#303E47] border-2 border-gray-500 flex items-center justify-center mb-6">
+            <span className="text-xs text-gray-400">3</span>
+          </div>
+          <div className="bg-[#1D262B] border border-[#303E47] p-6 rounded-lg w-full min-h-[180px] opacity-50">
+            <div className="text-gray-500 text-xs font-bold tracking-widest mb-2">PHASE 3 (FUTURE)</div>
+            <h3 className="text-xl font-bold text-white mb-2">Autonomy</h3>
+            <p className="text-sm text-gray-400">Digital Twin fully mapped. Automated dispatch logic. Smart contracts.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+);
+
+// 5. Budget
+const SlideBudget = () => (
+  <div className="h-full p-16 flex items-center gap-16">
+    <div className="w-1/2">
+      <h2 className="text-3xl font-bold text-[#F6F3EA] mb-6 flex items-center gap-3">
+        <span className="w-2 h-8 bg-[#D2FF05]"></span> INVESTMENT ASK
+      </h2>
+      <div className="text-6xl font-extrabold text-[#D2FF05] mb-2 tracking-tighter">R4.2M <span className="text-2xl text-gray-400 font-normal">ZAR</span></div>
+      <p className="text-gray-400 text-lg mb-8">Phase 1 Total Estimate</p>
+      
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-4 bg-[#1D262B] border-l-4 border-[#D2FF05] rounded-r">
+          <span className="text-white font-bold">Hardware & Plant</span>
+          <span className="text-[#D2FF05]">R1.7M</span>
+        </div>
+        <div className="flex items-center justify-between p-4 bg-[#1D262B] border-l-4 border-[#2D9CDB] rounded-r">
+          <span className="text-white font-bold">Software & Licensing</span>
+          <span className="text-[#2D9CDB]">R1.2M</span>
+        </div>
+        <div className="flex items-center justify-between p-4 bg-[#1D262B] border-l-4 border-gray-500 rounded-r">
+          <span className="text-white font-bold">Install & Labor</span>
+          <span className="text-gray-400">R1.3M</span>
+        </div>
+      </div>
+      
+      <div className="mt-8 p-4 bg-[#D2FF05] bg-opacity-10 border border-[#D2FF05] rounded text-sm text-[#D2FF05]">
+        <strong>Executive Note:</strong> Hardware is a one-time Capex. Software licensing moves to OpEx in Phase 2 for tax efficiency.
+      </div>
+    </div>
+
+    <div className="w-1/2 h-[400px] relative">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={PIE_DATA}
+            cx="50%"
+            cy="50%"
+            innerRadius={100}
+            outerRadius={140}
+            paddingAngle={5}
+            dataKey="value"
+            stroke="none"
+          >
+            <Cell fill="#D2FF05" />
+            <Cell fill="#2D9CDB" />
+            <Cell fill="#4F5B66" />
+          </Pie>
+          <Tooltip 
+            contentStyle={{backgroundColor: '#0B0E15', borderColor: '#303E47', borderRadius: '8px'}}
+            itemStyle={{color: '#fff'}}
+            formatter={(value) => `R${(value as number / 1000000).toFixed(1)}M`}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+        <div className="text-gray-400 text-sm">TOTAL</div>
+        <div className="text-white text-2xl font-bold">R4.2M</div>
+      </div>
+    </div>
+  </div>
+);
+
+// 6. Architecture
+const SlideArch = () => (
+  <div className="h-full p-16 flex flex-col items-center justify-center">
+    <h2 className="text-3xl font-bold text-[#F6F3EA] mb-12 self-start flex items-center gap-3">
+      <span className="w-2 h-8 bg-[#D2FF05]"></span> TECHNICAL ARCHITECTURE
+    </h2>
+
+    <div className="flex items-center gap-4 w-full max-w-5xl">
+      
+      {/* Edge */}
+      <div className="flex-1 flex flex-col items-center">
+        <div className="h-32 w-32 rounded-full bg-[#1D262B] border border-[#303E47] flex flex-col items-center justify-center relative z-10">
+          <Truck className="text-gray-400 mb-2" size={32}/>
+          <span className="text-xs text-gray-400 font-bold">THE EDGE</span>
+        </div>
+        <div className="mt-4 text-center">
+          <h4 className="text-white font-bold">Sensors</h4>
+          <p className="text-xs text-gray-500 mt-1">Messy Data<br/>(CAN-bus, PLC)</p>
+        </div>
+      </div>
+
+      {/* Connection */}
+      <div className="flex-1 h-2 bg-[#303E47] relative">
+        <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-[#D2FF05] to-transparent animate-[shimmer_2s_infinite]"></div>
+      </div>
+
+      {/* Bridge */}
+      <div className="flex-1 flex flex-col items-center">
+        <div className="h-32 w-32 rounded-full bg-[#1D262B] border border-[#2D9CDB] flex flex-col items-center justify-center relative z-10 shadow-[0_0_20px_rgba(45,156,219,0.2)]">
+          <Radio className="text-[#2D9CDB] mb-2" size={32}/>
+          <span className="text-xs text-[#2D9CDB] font-bold">THE BRIDGE</span>
+        </div>
+        <div className="mt-4 text-center">
+          <h4 className="text-white font-bold">Normalization</h4>
+          <p className="text-xs text-gray-500 mt-1">LoRaWAN / MQTT<br/>Connectivity Layer</p>
+        </div>
+      </div>
+
+      {/* Connection */}
+      <div className="flex-1 h-2 bg-[#303E47] relative">
+        <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-[#2D9CDB] to-[#D2FF05] animate-[shimmer_2s_infinite]"></div>
+      </div>
+
+      {/* Brain */}
+      <div className="flex-1 flex flex-col items-center">
+        <div className="h-40 w-40 rounded-hexagon bg-[#1D262B] border-2 border-[#D2FF05] flex flex-col items-center justify-center relative z-10 shadow-[0_0_30px_rgba(210,255,5,0.3)]">
+          <Cpu className="text-[#D2FF05] mb-2" size={40}/>
+          <span className="text-xs text-[#D2FF05] font-bold tracking-widest">THE HUB</span>
+        </div>
+        <div className="mt-4 text-center">
+          <h4 className="text-white font-bold">Veralogix Core</h4>
+          <p className="text-xs text-gray-500 mt-1">Analytics, Alerts<br/>& Audit Logs</p>
+        </div>
+      </div>
+
+      {/* Connection */}
+      <div className="flex-1 h-2 bg-[#303E47] relative">
+        <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-[#D2FF05] to-white animate-[shimmer_2s_infinite]"></div>
+      </div>
+
+      {/* Hands */}
+      <div className="flex-1 flex flex-col items-center">
+        <div className="h-32 w-32 rounded-full bg-[#1D262B] border border-white flex flex-col items-center justify-center relative z-10">
+          <Users className="text-white mb-2" size={32}/>
+          <span className="text-xs text-white font-bold">THE HANDS</span>
+        </div>
+        <div className="mt-4 text-center">
+          <h4 className="text-white font-bold">Action</h4>
+          <p className="text-xs text-gray-500 mt-1">Decisions made<br/>in seconds</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+);
+
+// 7. Risks
+const SlideRisks = () => (
+  <div className="h-full p-16">
+    <h2 className="text-3xl font-bold text-[#F6F3EA] mb-12 flex items-center gap-3">
+      <span className="w-2 h-8 bg-[#D2FF05]"></span> RISK ASSESSMENT
+    </h2>
+
+    <div className="grid grid-cols-1 gap-4">
+      
+      {/* Risk 1 */}
+      <div className="bg-[#1D262B] border-l-4 border-yellow-500 p-6 rounded-r-lg flex items-center justify-between">
+        <div className="w-1/4">
+          <h3 className="text-white font-bold text-lg">Connectivity Failure</h3>
+          <div className="flex gap-2 mt-2">
+            <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded">Prob: Medium</span>
+            <span className="text-xs bg-red-500/20 text-red-500 px-2 py-1 rounded">Impact: High</span>
+          </div>
+        </div>
+        <div className="w-3/4 pl-8 border-l border-[#303E47]">
+          <h4 className="text-gray-400 text-xs font-bold uppercase mb-1">MITIGATION STRATEGY</h4>
+          <p className="text-white">
+            <span className="text-[#D2FF05] font-bold">Local Edge Processing.</span> The system records data locally on the truck/plant hardware and syncs automatically when connection is restored. Zero data loss guarantee.
+          </p>
+        </div>
+      </div>
+
+      {/* Risk 2 */}
+      <div className="bg-[#1D262B] border-l-4 border-red-500 p-6 rounded-r-lg flex items-center justify-between">
+        <div className="w-1/4">
+          <h3 className="text-white font-bold text-lg">User Adoption</h3>
+          <div className="flex gap-2 mt-2">
+            <span className="text-xs bg-red-500/20 text-red-500 px-2 py-1 rounded">Prob: High</span>
+            <span className="text-xs bg-red-500/20 text-red-500 px-2 py-1 rounded">Impact: High</span>
+          </div>
+        </div>
+        <div className="w-3/4 pl-8 border-l border-[#303E47]">
+          <h4 className="text-gray-400 text-xs font-bold uppercase mb-1">MITIGATION STRATEGY</h4>
+          <p className="text-white">
+            <span className="text-[#D2FF05] font-bold">"Gamified" UX.</span> Interface designed for operators, not data scientists. Training is embedded directly into the SMART People module app.
+          </p>
+        </div>
+      </div>
+
+      {/* Risk 3 */}
+      <div className="bg-[#1D262B] border-l-4 border-green-500 p-6 rounded-r-lg flex items-center justify-between">
+        <div className="w-1/4">
+          <h3 className="text-white font-bold text-lg">Integration Delays</h3>
+          <div className="flex gap-2 mt-2">
+            <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">Prob: Low</span>
+            <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded">Impact: Medium</span>
+          </div>
+        </div>
+        <div className="w-3/4 pl-8 border-l border-[#303E47]">
+          <h4 className="text-gray-400 text-xs font-bold uppercase mb-1">MITIGATION STRATEGY</h4>
+          <p className="text-white">
+            <span className="text-[#D2FF05] font-bold">Lab Tested.</span> All Milesight hardware and sensors have been pre-configured and tested in the Veralogix Lab before shipping to site. Plug-and-play install.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+);
+
+// 8. Next Steps
+const SlideNextSteps = () => (
+  <div className="h-full flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="absolute inset-0 bg-[#D2FF05] opacity-[0.02] bg-[radial-gradient(#D2FF05_1px,transparent_1px)] [background-size:20px_20px]"></div>
+    
+    <div className="relative z-10 text-center max-w-4xl">
+      <h2 className="text-6xl font-extrabold text-white mb-8 tracking-tight">
+        GREEN LIGHT FOR <span className="text-[#D2FF05]">PHASE 1</span>
+      </h2>
+      
+      <div className="flex justify-center gap-8 mb-16">
+        <div className="text-left">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-6 h-6 rounded-full bg-[#D2FF05] text-black font-bold flex items-center justify-center text-sm">1</div>
+            <span className="text-white font-bold text-xl">Procurement</span>
+          </div>
+          <p className="text-gray-400 pl-9">Sign off R4.2M Capex</p>
+        </div>
+        <div className="text-left">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-6 h-6 rounded-full bg-[#D2FF05] text-black font-bold flex items-center justify-center text-sm">2</div>
+            <span className="text-white font-bold text-xl">Deployment</span>
+          </div>
+          <p className="text-gray-400 pl-9">Install LoRaWAN @ Woestalleen</p>
+        </div>
+        <div className="text-left">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-6 h-6 rounded-full bg-[#D2FF05] text-black font-bold flex items-center justify-center text-sm">3</div>
+            <span className="text-white font-bold text-xl">Onboarding</span>
+          </div>
+          <p className="text-gray-400 pl-9">Import workforce data</p>
+        </div>
+      </div>
+
+      <button className="group relative px-12 py-6 bg-[#D2FF05] text-black font-extrabold text-xl rounded-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(210,255,5,0.4)]">
+        APPROVE PILOT LAUNCH
+        <span className="absolute -bottom-8 left-0 w-full text-center text-gray-500 text-xs font-normal opacity-0 group-hover:opacity-100 transition-opacity">
+          Initiates Procurement & Deployment Workflows
+        </span>
+      </button>
+
+      <p className="mt-16 text-gray-400 text-lg italic">
+        "Approving this build moves us from <span className="text-white font-bold">monitoring</span> the mine to <span className="text-[#D2FF05] font-bold">optimizing</span> it."
+      </p>
+    </div>
+  </div>
+);
+
+// --- MAIN APP COMPONENT ---
+
+const App = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slides = [
+    SlideTitle,
+    SlideExecSum,
+    SlideDashboard,
+    SlideRoadmap,
+    SlideBudget,
+    SlideArch,
+    SlideRisks,
+    SlideNextSteps
+  ];
+
+  const nextSlide = () => setCurrentSlide(p => Math.min(p + 1, slides.length - 1));
+  const prevSlide = () => setCurrentSlide(p => Math.max(p - 1, 0));
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const CurrentSlideComponent = slides[currentSlide];
+
+  return (
+    <div className="w-screen h-screen bg-[#0B0E15] text-[#F6F3EA] overflow-hidden font-sans select-none flex flex-col">
+      {/* Slide Content */}
+      <div className="flex-1 relative">
+        <CurrentSlideComponent />
+      </div>
+
+      {/* Controls Bar */}
+      <div className="h-12 bg-[#05070A] border-t border-[#1D262B] flex items-center justify-between px-6 z-50">
+        <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+          <span className="text-[#D2FF05]">VERALOGIX</span>
+          <span>//</span>
+          <span>EXCO_DECK_V1.0</span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={prevSlide} 
+            disabled={currentSlide === 0}
+            className="p-2 hover:bg-[#1D262B] rounded disabled:opacity-30 disabled:hover:bg-transparent"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <span className="text-sm font-mono text-gray-400">
+            {currentSlide + 1} <span className="text-gray-600">/</span> {slides.length}
+          </span>
+          <button 
+            onClick={nextSlide} 
+            disabled={currentSlide === slides.length - 1}
+            className="p-2 hover:bg-[#1D262B] rounded disabled:opacity-30 disabled:hover:bg-transparent"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
